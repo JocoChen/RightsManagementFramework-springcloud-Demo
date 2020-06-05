@@ -1,0 +1,35 @@
+server:
+  port: 8888
+spring:
+  redis:
+    host: 127.0.0.1 # Redis服务器地址
+    database: 0 # Redis数据库索引（默认为0）
+    port: 6379 # Redis服务器连接端口
+    password: # Redis服务器连接密码（默认为空）
+    timeout: 3000ms # 连接超时时间
+    lettuce:   #相比jedis，lettuce连接池的功能更加出色，注意：pom.xml中需要添加依赖包commons-pool2
+      pool:
+        max-active: 8 # 连接池最大连接数
+        max-idle: 8 # 连接池最大空闲连接数
+        min-idle: 0 # 连接池最小空闲连接数
+        max-wait: -1ms # 连接池最大阻塞等待时间，负值表示没有限制
+#    cluster:
+#      nodes:
+#        - 127.0.0.1:6391
+#        - 127.0.0.1:6392
+#        - 127.0.0.1:6393
+#        - 127.0.0.1:6394
+#        - 127.0.0.1:6395
+#        - 127.0.0.1:6396
+#
+jwt:
+  tokenHeader: Authorization #JWT存储的请求头
+  secret: admin-secret #JWT加解密使用的密钥
+  expiration: 604800 #JWT的超期限时间(60*60*24)
+  tokenHead: Bearer  #JWT负载中拿到开头
+logging:
+  level:
+    org.springframework.cloud.gateway: debug  #开启spring-Cloud-gateway的日志级别为debug，方便debug调试。
+    org.springframework.http.server.reactive: debug
+    org.springframework.web.reactive: debug
+    reactor.ipc.netty: debug

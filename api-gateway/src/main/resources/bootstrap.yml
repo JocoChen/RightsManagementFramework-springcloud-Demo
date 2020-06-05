@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    nacos:
+      config:
+        server-addr: localhost:8848 #配置中心
+      discovery:
+        server-addr: localhost:8848 #注册中心
+    gateway:
+      discovery:
+        locator:
+          enabled: true  #是否与服务发现组件进行结合，通过serviceId转发到具体的服务实例。默认为false，设为true便开启通过服务中心的自动根据 serviceId 创建路由的功能。
+      default-filters:   #配置默认hystrix过滤器
+        - name: Hystrix
+          args:
+            name: default
+            fallbackUri: 'forward:/defaultFallback'  #重定向到“/defaultFallback”进行降级处理，返回对应的异常提示
+      routes:
+        - id: consumer-router    #id的值随意，方便记忆并且在所有路由定义中唯一即可
+          uri: lb://microservice-consumer  #lb://为固定写法，表示开启负载均衡；microservice-consumer即服务在Nacos中注册的名字
+          predicates:
+            - Path=/admin/**  #predicates:- Path=/admin/** 使用"Path Route Predicate Factory"，规则为/admin开头的任意URI
+          filters:
+            - name: RequestRateLimiter   #filter名称必须是RequestRateLimiter
+              args:
+                redis-rate-limiter:
+                  replenishRate: 1  #令牌桶填充速率
+                  burstCapacity: 5  #令牌桶的容量，允许在一秒钟内完成的最大请求数
+                key-resolver: '#{@ipKeyResolver}'   #使用SpEL按名称引用bean，指定限流的Key，根据IP进行限流
+        - id: provider-router
+          uri: lb://microservice-provider
+          predicates:
+            - Path=/admin/**  #predicates:- Path=/admin/** 使用"Path Route Predicate Factory"，规则为/admin开头的任意URI
+            - Path=/user/**
+#熔断配置
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          strategy: SEMAPHORE   #隔离策略 采用信号量策略，默认值“THREAD”线程池的隔离策略
+          thread:
+            timeoutInMilliseconds: 3000  #所有方法的超时时间
+          semaphore:
+            maxConcurrentRequests: 20   #信号量最大请求数，默认值：10，只对SEMAPHORE模式有效
+#  threadpool:
+#    default:
+#      coreSize: 20   #线程池容量，针对“THREAD”线程池的隔离策略，默认值：10
+

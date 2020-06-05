@@ -1,0 +1,100 @@
+server:
+  port: 8308
+spring:
+#  profiles:
+#    active: dev
+#  application:
+#    name: microservice-consumer
+##  main:
+##    allow-bean-definition-overriding: true
+#  security:
+#    user:
+#      name: admin
+#      password: admin
+#  cloud:
+#    nacos:
+#      config:
+#        server-addr: localhost:8848 #配置中心
+#      discovery:
+#        server-addr: localhost:8848 #注册中心
+  datasource:
+    url: jdbc:mysql://localhost:3306/mall?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    druid:
+      initial-size: 5 #连接池初始化大小
+      min-idle: 10 #最小空闲连接数
+      max-active: 20 #最大连接数
+      web-stat-filter:
+        exclusions: "*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*" #不统计这些请求数据
+      stat-view-servlet: #访问监控网页的登录用户名和密码
+        login-username: druid
+        login-password: druid
+  redis:
+    host: 127.0.0.1 # Redis服务器地址
+    database: 0 # Redis数据库索引（默认为0）
+    port: 6379 # Redis服务器连接端口
+    password: # Redis服务器连接密码（默认为空）
+    timeout: 3000ms # 连接超时时间
+    lettuce:   #相比jedis，lettuce连接池的功能更加出色，注意：pom.xml中需要添加依赖包commons-pool2
+      pool:
+        max-active: 8 # 连接池最大连接数
+        max-idle: 8 # 连接池最大空闲连接数
+        min-idle: 0 # 连接池最小空闲连接数
+        max-wait: -1ms # 连接池最大阻塞等待时间，负值表示没有限制
+#    cluster:
+#      nodes:
+#        - 127.0.0.1:6391
+#        - 127.0.0.1:6392
+#        - 127.0.0.1:6393
+#        - 127.0.0.1:6394
+#        - 127.0.0.1:6395
+#        - 127.0.0.1:6396
+
+jwt:
+  tokenHeader: Authorization #JWT存储的请求头
+  secret: admin-secret #JWT加解密使用的密钥
+  expiration: 604800 #JWT的超期限时间(60*60*24)
+  tokenHead: Bearer  #JWT负载中拿到开头
+secure:
+  ignored:
+    urls: #安全路径白名单
+      - /swagger-ui.html
+      - /swagger-resources/**
+      - /swagger/**
+      - /**/v2/api-docs
+      - /**/*.js
+      - /**/*.css
+      - /**/*.png
+      - /**/*.ico
+      - /webjars/springfox-swagger-ui/**
+      - /actuator/**
+      - /druid/**
+      - /admin/login
+      - /admin/register
+      - /admin/info
+      - /admin/logout
+      - /minio/upload
+
+#########针对多个项目
+#  项目A，mapper.xml 路径在 resources/mappers/push 下面
+#  项目B，mapper.xml 路径在 resources/mappers/下面
+#  项目A引用了项目B，把项目B的jar包加入到pom文件中了
+#  那么项目A的application.properties配置文件中配置mapper.xml路径如下：
+#  mybatis.mapper-locations=classpath:mappers/push/*.xml,classpath*:/mappers/*.xml
+#  注意点：在classpath后面的 * 必不可少，缺少型号的话后面的通配符不起作用。
+#  **表示可以表示任意多级目录。
+#mybatis:
+#  mapper-locations:
+#    - classpath:dao/*.xml             #对应本项目的xml文件所在目录  resource/dao/*.xml
+#    - classpath*:/mbg/mapper/*.xml    #对应引用项目的xml文件所在目录  resources/mbg/mapper/*.xml
+
+mybatis:
+  mapper-locations:
+    - classpath:mbg/mapper/*.xml       #注意"classpath:"后都不能有空格，对应本项目的xml文件所在目录resource/mbg/mapper/*.xml
+    - classpath*:/mbg/mapper/*.xml     #引入依赖项目mbg的xml文件，resources/mbg/mappers/下面所有xml文件
+
+service-url:
+  nacos-user-service: http://microservice-provider
+
+sleep: 5000

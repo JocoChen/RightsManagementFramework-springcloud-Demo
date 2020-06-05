@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: microservice-provider
+  cloud:
+    nacos:
+      config:
+        server-addr: localhost:8848 #配置中心
+      discovery:
+        server-addr: localhost:8848 #注册中心
